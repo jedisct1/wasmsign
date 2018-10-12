@@ -6,7 +6,7 @@ use parity_wasm::elements::*;
 pub fn verify_signature(
     module: &Module,
     ad: Option<&[u8]>,
-    pk: PublicKey,
+    pk: &PublicKey,
     signature_symbol: &str,
 ) -> Result<(), WError> {
     // Get the global ID of the exported name matching the signature symbol

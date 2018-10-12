@@ -1,20 +1,16 @@
 extern crate byteorder;
 extern crate clap;
 extern crate ed25519_dalek;
-#[macro_use]
 extern crate failure;
 extern crate parity_wasm;
 extern crate rand;
 extern crate sha2;
+extern crate wasmsign;
 
-mod actions;
-mod config;
-mod errors;
-mod signature;
-mod wasm_signature;
+mod app;
 
-use self::config::*;
-use self::errors::*;
+use self::app::*;
+use self::wasmsign::*;
 
 fn main() -> Result<(), WError> {
     let config = Config::parse_cmdline()?;

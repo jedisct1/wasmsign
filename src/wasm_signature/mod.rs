@@ -1,5 +1,5 @@
 mod attach;
 mod verify;
 
-pub use self::attach::*;
-pub use self::verify::*;
+pub(crate) use self::attach::*;
+pub(crate) use self::verify::*;

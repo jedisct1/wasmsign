@@ -1,22 +1,19 @@
-use super::config::*;
-use super::errors::*;
-use super::parity_wasm;
-use super::signature::eddsa::*;
-use super::signature::*;
-use super::wasm_signature;
-use parity_wasm::elements::*;
+use super::*;
+use wasmsign::signature::eddsa::*;
+use wasmsign::signature::*;
+use wasmsign;
 use std::fs::File;
 use std::io::prelude::*;
 
 pub fn keygen(config: &Config) -> Result<(), WError> {
-    let default_signature_alg: Box<SignatureAlg> = Box::new(EdDSA);
+    let default_signature_alg = EdDSA;
     let (pk_path, sk_path) = match (&config.pk_path, &config.sk_path) {
         (Some(pk_path), Some(sk_path)) => (pk_path, sk_path),
         _ => Err(WError::UsageError(
             "Please mention the file paths to store the public and secret keys",
         ))?,
     };
-    let key_pair = default_signature_alg.keygen();
+    let key_pair = wasmsign::keygen(&default_signature_alg);
     File::create(pk_path)?.write_all(&key_pair.pk.to_bytes())?;
     File::create(sk_path)?.write_all(&key_pair.sk.to_bytes())?;
     println!("Public key stored to [{}]", pk_path.to_str().unwrap());
@@ -44,7 +41,6 @@ pub fn sign(config: &Config) -> Result<(), WError> {
         ))?
     }
     let key_pair = KeyPair::new(alg_id, pk, sk);
-    let signature_alg = key_pair.sk.to_alg()?;
     let input_path = match &config.input_path {
         Some(input_path) => input_path,
         _ => Err(WError::UsageError("Input file path required"))?,
@@ -53,16 +49,11 @@ pub fn sign(config: &Config) -> Result<(), WError> {
         Some(output_path) => output_path,
         _ => Err(WError::UsageError("Output file path required"))?,
     };
-    let module: Module = parity_wasm::deserialize_file(input_path)?;
     let ad: Option<&[u8]> = config.ad.as_ref().map(|s| s.as_slice());
-    let module = wasm_signature::attach_signature(
-        module,
-        &signature_alg,
-        ad,
-        &key_pair,
-        &config.symbol_name,
-    )?;
-    parity_wasm::serialize_to_file(output_path, module)?;
+    let mut module_bytes = vec![];
+    File::open(input_path)?.read_to_end(&mut module_bytes)?;
+    let signed_module_bytes = wasmsign::sign(&module_bytes, &key_pair, ad, &config.symbol_name)?;
+    File::create(output_path)?.write_all(&signed_module_bytes)?;
     Ok(())
 }
 
@@ -76,13 +67,12 @@ pub fn verify(config: &Config) -> Result<(), WError> {
     let mut pk_bytes = vec![];
     File::open(pk_path)?.read_to_end(&mut pk_bytes)?;
     let pk = PublicKey::from_bytes(&pk_bytes)?;
-    pk.to_alg()?;
     let input_path = match &config.input_path {
         Some(input_path) => input_path,
         _ => Err(WError::UsageError("Input file path required"))?,
     };
-    let module: Module = parity_wasm::deserialize_file(input_path)?;
     let ad: Option<&[u8]> = config.ad.as_ref().map(|s| s.as_slice());
-    wasm_signature::verify_signature(&module, ad, pk, &config.symbol_name)?;
-    Ok(())
+    let mut module_bytes = vec![];
+    File::open(input_path)?.read_to_end(&mut module_bytes)?;
+    wasmsign::verify(&module_bytes, &pk, ad, &config.symbol_name)
 }
