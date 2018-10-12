@@ -14,6 +14,10 @@ pub enum WError {
     Io(#[cause] io::Error),
     #[fail(display = "{}", _0)]
     WAsmError(#[cause] elements::Error),
+    #[fail(display = "{}", _0)]
+    SignatureError(&'static str),
+    #[fail(display = "{}", _0)]
+    EdDSASignatureError(#[cause] ed25519_dalek::SignatureError),
     #[fail(display = "Unsupported")]
     Unsupported,
 }
@@ -27,5 +31,11 @@ impl From<io::Error> for WError {
 impl From<elements::Error> for WError {
     fn from(e: elements::Error) -> WError {
         WError::WAsmError(e)
+    }
+}
+
+impl From<ed25519_dalek::SignatureError> for WError {
+    fn from(e: ed25519_dalek::SignatureError) -> WError {
+        WError::EdDSASignatureError(e)
     }
 }

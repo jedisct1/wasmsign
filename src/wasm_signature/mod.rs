@@ -1,5 +1,5 @@
 mod attach;
-mod get;
+mod verify;
 
 pub use self::attach::*;
-pub use self::get::*;
+pub use self::verify::*;
