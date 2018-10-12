@@ -56,7 +56,7 @@ Additional data can be authenticated, so that the signature is only valid for a 
 
 ```sh
 wasmsign --sign --pk-path key.public --sk-path key.secret \
-  --input unsignedwasm --output signed.wasm --ad user19238
+  --input unsigned.wasm --output signed.wasm --ad user19238
 ```
 
 ## Verify an existing wasm binary
