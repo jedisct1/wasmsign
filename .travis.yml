@@ -1,3 +1,4 @@
 language: rust
+rust: nightly
 cache: cargo
 sudo: false

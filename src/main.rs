@@ -1,5 +1,3 @@
-#![feature(nll)]
-
 extern crate byteorder;
 extern crate clap;
 extern crate ed25519_dalek;

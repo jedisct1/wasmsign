@@ -2,6 +2,7 @@
 name = "wasmsign"
 version = "0.1.0"
 authors = ["Frank Denis <github@pureftpd.org>"]
+edition = "2018"
 
 [dependencies]
 byteorder = "1"

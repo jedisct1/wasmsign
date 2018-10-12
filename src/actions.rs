@@ -1,5 +1,6 @@
 use super::config::*;
 use super::errors::*;
+use super::parity_wasm;
 use super::signature::eddsa::*;
 use super::signature::*;
 use super::wasm_signature;
