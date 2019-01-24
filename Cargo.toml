@@ -8,7 +8,7 @@ license-file = "LICENSE"
 license = "ISC"
 homepage = "https://github.com/jedisct1/wasmsign"
 repository = "https://github.com/jedisct1/wasmsign.git"
-documentation = "README.md"
+documentation = "https://github.com/jedisct1/wasmsign/blob/master/README.md"
 
 [dependencies]
 byteorder = "1"
