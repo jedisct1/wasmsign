@@ -1,9 +1,8 @@
 use super::*;
-use wasmsign::signature::eddsa::*;
-use wasmsign::signature::*;
-use wasmsign;
 use std::fs::File;
 use std::io::prelude::*;
+use wasmsign;
+use wasmsign::signature::eddsa::*;
 
 pub fn keygen(config: &Config) -> Result<(), WError> {
     let default_signature_alg = EdDSA;

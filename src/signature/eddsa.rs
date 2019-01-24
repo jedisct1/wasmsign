@@ -1,7 +1,7 @@
 use super::*;
 use byteorder::{LittleEndian, WriteBytesExt};
 use ed25519_dalek::SIGNATURE_LENGTH;
-use rand::OsRng;
+use rand::rngs::OsRng;
 use sha2::{Digest, Sha512};
 use std::u32;
 
