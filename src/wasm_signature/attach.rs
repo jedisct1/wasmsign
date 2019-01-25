@@ -19,7 +19,11 @@ pub fn attach_signature(
             .entries()
             .iter()
             .map(|data_segment| {
-                let instructions = data_segment.offset().code();
+                let instructions = data_segment
+                    .offset()
+                    .as_ref()
+                    .expect("Invalid offset")
+                    .code();
                 if instructions.len() != 2 {
                     panic!("Multiple offsets")
                 }
@@ -68,8 +72,9 @@ pub fn attach_signature(
         let new_data_segment_len = new_data.len() as u32;
         let new_data_segment = DataSegment::new(
             new_data_segment_index as u32,
-            InitExpr::new(new_data_segment_offset_code),
+            Some(InitExpr::new(new_data_segment_offset_code)),
             new_data,
+            false,
         );
         let data_section = module.data_section_mut().expect("No data section");
         let new_data_index = data_section.entries().len();
@@ -104,8 +109,9 @@ pub fn attach_signature(
         let new_ref_data = ref_bytes;
         let new_ref_data_segment = DataSegment::new(
             new_ref_data_segment_index as u32,
-            InitExpr::new(new_ref_data_segment_offset_code),
+            Some(InitExpr::new(new_ref_data_segment_offset_code)),
             new_ref_data,
+            false,
         );
         let data_section = module.data_section_mut().expect("No data section");
         data_section.entries_mut().push(new_ref_data_segment);
