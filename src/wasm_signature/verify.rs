@@ -76,11 +76,7 @@ pub fn verify_signature(
     let data_segment_offset = {
         let data_section = module.data_section().expect("No data section");
         let ref_data_segment = match data_section.entries().iter().find(|data_segment| {
-            let instructions = data_segment
-                .offset()
-                .as_ref()
-                .expect("Invalid offset")
-                .code();
+            let instructions = data_segment.offset().code();
             if instructions.len() != 2 {
                 return false;
             }
@@ -123,11 +119,7 @@ pub fn verify_signature(
     let (signature, data_segment_value) = {
         let data_section = module.data_section_mut().expect("No data section");
         let data_segment = match data_section.entries_mut().iter_mut().find(|data_segment| {
-            let instructions = data_segment
-                .offset()
-                .as_ref()
-                .expect("Invalid offset")
-                .code();
+            let instructions = data_segment.offset().code();
             if instructions.len() != 2 {
                 return false;
             }
