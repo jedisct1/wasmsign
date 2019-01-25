@@ -51,18 +51,18 @@ pub fn attach_signature(
 
     // Add the signature to the data section
 
-    let (new_data_segment_offset, new_data_segment_len, new_data_segment_index, new_data_index) = {
+    let (new_data_segment_offset, new_data_segment_len, new_data_memory_index, new_data_index) = {
         let data_section = module.data_section().expect("No data section");
         if (i32::MAX as u32 - last_data_segment.0 as u32) < last_data_segment.1 {
             Err(WError::UsageError(
                 "Data section is full, offset would overflow",
             ))?;
         }
-        let new_data_segment_offset = last_data_segment.0 + last_data_segment.1 as i32;
-        let new_data_segment_index = data_section.entries().len();
-        if new_data_segment_index > u32::MAX as usize {
+        if data_section.entries().len() > u32::MAX as usize {
             Err(WError::UsageError("Data section is full"))?;
         }
+        let new_data_segment_offset = last_data_segment.0 + last_data_segment.1 as i32;
+        let new_data_memory_index = 0;
         let new_data_segment_offset_code = vec![
             Instruction::I32Const(new_data_segment_offset as i32),
             Instruction::End,
@@ -71,7 +71,7 @@ pub fn attach_signature(
         let new_data = empty_signature.clone();
         let new_data_segment_len = new_data.len() as u32;
         let new_data_segment = DataSegment::new(
-            new_data_segment_index as u32,
+            new_data_memory_index as u32,
             Some(InitExpr::new(new_data_segment_offset_code)),
             new_data,
             false,
@@ -82,7 +82,7 @@ pub fn attach_signature(
         (
             new_data_segment_offset,
             new_data_segment_len,
-            new_data_segment_index,
+            new_data_memory_index,
             new_data_index,
         )
     };
@@ -90,16 +90,17 @@ pub fn attach_signature(
     // Add the address of the signature to the data section
 
     let new_ref_data_segment_offset = {
+        let data_section = module.data_section().expect("No data section");
         if (i32::MAX as u32 - new_data_segment_offset as u32) < new_data_segment_len {
             Err(WError::UsageError(
                 "Data section is full, offset would overflow",
             ))?;
         }
-        let new_ref_data_segment_offset = new_data_segment_offset + new_data_segment_len as i32;
-        if new_data_segment_index > u32::MAX as usize {
+        if data_section.entries().len() > u32::MAX as usize {
             Err(WError::UsageError("Data section is full"))?;
         }
-        let new_ref_data_segment_index = new_data_segment_index + 1;
+        let new_ref_data_segment_offset = new_data_segment_offset + new_data_segment_len as i32;
+        let new_ref_data_memory_index = new_data_memory_index;
         let new_ref_data_segment_offset_code = vec![
             Instruction::I32Const(new_ref_data_segment_offset as i32),
             Instruction::End,
@@ -108,7 +109,7 @@ pub fn attach_signature(
         ref_bytes.write_i32::<LittleEndian>(new_data_segment_offset)?;
         let new_ref_data = ref_bytes;
         let new_ref_data_segment = DataSegment::new(
-            new_ref_data_segment_index as u32,
+            new_ref_data_memory_index as u32,
             Some(InitExpr::new(new_ref_data_segment_offset_code)),
             new_ref_data,
             false,
