@@ -14,6 +14,8 @@ pub use self::errors::*;
 pub use self::signature::*;
 use parity_wasm::elements::*;
 
+pub const DEFAULT_SYMBOL_NAME: &str = "___SIGNATURE";
+
 pub fn keygen(signature_alg: &SignatureAlg) -> KeyPair {
     signature_alg.keygen()
 }

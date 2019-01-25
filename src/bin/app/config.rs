@@ -2,8 +2,6 @@ use super::*;
 use clap::{App, Arg};
 use std::path::PathBuf;
 
-const DEFAULT_SYMBOL_NAME: &str = "___SIGNATURE";
-
 #[derive(Default, Clone, Debug)]
 pub struct Config {
     pub keygen: bool,
