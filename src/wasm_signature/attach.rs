@@ -74,7 +74,6 @@ pub fn attach_signature(
             new_data_memory_index as u32,
             Some(InitExpr::new(new_data_segment_offset_code)),
             new_data,
-            false,
         );
         let data_section = module.data_section_mut().expect("No data section");
         let new_data_index = data_section.entries().len();
@@ -112,7 +111,6 @@ pub fn attach_signature(
             new_ref_data_memory_index as u32,
             Some(InitExpr::new(new_ref_data_segment_offset_code)),
             new_ref_data,
-            false,
         );
         let data_section = module.data_section_mut().expect("No data section");
         data_section.entries_mut().push(new_ref_data_segment);
