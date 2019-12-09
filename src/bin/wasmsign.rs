@@ -1,11 +1,6 @@
-extern crate byteorder;
-extern crate clap;
-extern crate ed25519_dalek;
-extern crate failure;
-extern crate parity_wasm;
-extern crate rand;
-extern crate sha2;
-extern crate wasmsign;
+use clap;
+
+use wasmsign;
 
 mod app;
 

@@ -16,7 +16,7 @@ impl Signature {
         Signature { alg_id, raw }
     }
 
-    pub fn length(signature_alg: &Box<SignatureAlg>) -> usize {
+    pub fn length(signature_alg: &Box<dyn SignatureAlg>) -> usize {
         4 + signature_alg.raw_signature_length()
     }
 
@@ -39,7 +39,7 @@ impl Signature {
         Ok(Signature { alg_id, raw })
     }
 
-    pub fn to_alg(&self) -> Result<Box<SignatureAlg>, WError> {
+    pub fn to_alg(&self) -> Result<Box<dyn SignatureAlg>, WError> {
         match self.alg_id {
             eddsa::ALG_ID => Ok(Box::new(EdDSA)),
             _ => Err(WError::SignatureError("Unsupported signature scheme")),
@@ -81,7 +81,7 @@ pub trait Key {
         Ok(AnyKey::new(alg_id, raw))
     }
 
-    fn to_alg(&self) -> Result<Box<SignatureAlg>, WError> {
+    fn to_alg(&self) -> Result<Box<dyn SignatureAlg>, WError> {
         match self.alg_id() {
             eddsa::ALG_ID => Ok(Box::new(EdDSA)),
             _ => Err(WError::SignatureError("Unsupported signature scheme")),

@@ -1,10 +1,6 @@
-extern crate byteorder;
-extern crate ed25519_dalek;
 #[macro_use]
 extern crate failure;
-extern crate parity_wasm;
-extern crate rand;
-extern crate sha2;
+use parity_wasm;
 
 pub mod errors;
 pub mod signature;
@@ -16,7 +12,7 @@ use parity_wasm::elements::*;
 
 pub const DEFAULT_SYMBOL_NAME: &str = "___SIGNATURE";
 
-pub fn keygen(signature_alg: &SignatureAlg) -> KeyPair {
+pub fn keygen(signature_alg: &dyn SignatureAlg) -> KeyPair {
     signature_alg.keygen()
 }
 

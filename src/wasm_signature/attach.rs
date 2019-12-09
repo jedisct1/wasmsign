@@ -6,7 +6,7 @@ use std::{i32, u32};
 
 pub fn attach_signature(
     mut module: Module,
-    signature_alg: &Box<SignatureAlg>,
+    signature_alg: &Box<dyn SignatureAlg>,
     ad: Option<&[u8]>,
     key_pair: &KeyPair,
     signature_symbol: &str,
