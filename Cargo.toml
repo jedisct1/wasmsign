@@ -12,7 +12,7 @@ documentation = "https://github.com/jedisct1/wasmsign/blob/master/README.md"
 [dependencies]
 byteorder = "1"
 clap = "2"
-ed25519-dalek = "0.9"
+ed25519-dalek = "1.0"
 failure = "0.1"
 parity-wasm = "0.41"
 rand = "0.6"
