@@ -14,7 +14,7 @@ The resulting binary remains a standalone, valid wasm binary, but its signature 
 
 # Installation
 
-`wasmsign` requires rust-nightly, which can be installed using [`rustup`](https://rustup.rs/).
+`wasmsign` requires rust, which can be installed using [`rustup`](https://rustup.rs/).
 
 `cargo install` is then all it takes to compile and install the command-line `wasmsign` tool.
 

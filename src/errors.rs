@@ -17,7 +17,7 @@ pub enum WError {
     #[fail(display = "{}", _0)]
     SignatureError(&'static str),
     #[fail(display = "{}", _0)]
-    EdDSASignatureError(#[cause] ed25519_dalek::SignatureError),
+    EdDSASignatureError(#[cause] ed25519_compact::Error),
     #[fail(display = "Unsupported")]
     Unsupported,
 }
@@ -34,8 +34,8 @@ impl From<elements::Error> for WError {
     }
 }
 
-impl From<ed25519_dalek::SignatureError> for WError {
-    fn from(e: ed25519_dalek::SignatureError) -> WError {
+impl From<ed25519_compact::Error> for WError {
+    fn from(e: ed25519_compact::Error) -> WError {
         WError::EdDSASignatureError(e)
     }
 }
