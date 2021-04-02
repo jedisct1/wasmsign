@@ -17,17 +17,17 @@ pub fn verify_signature(
             .iter()
             .find(|export_entry| export_entry.field() == signature_symbol)
         {
-            None => Err(WError::ParseError(format!(
+            None => return Err(WError::ParseError(format!(
                 "Symbol {} not found",
                 signature_symbol
-            )))?,
+            ))),
             Some(export_entry) => export_entry,
         };
         let global_id = match export_entry.internal() {
             Internal::Global(global_id) => *global_id,
-            _ => Err(WError::ParseError(
+            _ => return Err(WError::ParseError(
                 "Wrong type for the signature global".to_string(),
-            ))?,
+            )),
         };
         global_id
     };
@@ -38,35 +38,35 @@ pub fn verify_signature(
         let global_section = module.global_section().expect("No global section");
         let global_entries = global_section.entries();
         if global_entries.len() <= global_id as usize {
-            Err(WError::ParseError(
+            return Err(WError::ParseError(
                 "Global section is too short".to_string(),
-            ))?;
+            ));
         }
         let global_entry = &global_entries[global_id as usize];
         let global_entry_type = global_entry.global_type();
         if global_entry_type.is_mutable() {
-            Err(WError::ParseError("Signature is mutable".to_string()))?;
+            return Err(WError::ParseError("Signature is mutable".to_string()));
         }
         match global_entry_type.content_type() {
             ValueType::I32 => {}
-            _ => Err(WError::ParseError(
+            _ => return Err(WError::ParseError(
                 "Unexpected type for the signature global entry".to_string(),
-            ))?,
+            )),
         }
         let global_entry_code = global_entry.init_expr().code();
         if global_entry_code.len() != 2 {
-            Err(WError::ParseError(
+            return Err(WError::ParseError(
                 "Unexpected length for the global entry code".to_string(),
-            ))?;
+            ));
         }
         if global_entry_code[1] != Instruction::End {
-            Err(WError::ParseError(
+            return Err(WError::ParseError(
                 "End not found in the global entry code".to_string(),
-            ))?;
+            ));
         }
         let ref_data_segment_offset = match global_entry_code[0] {
             Instruction::I32Const(ref_data_segment_offset) => ref_data_segment_offset,
-            _ => Err(WError::ParseError("Unexpected offset type".to_string()))?,
+            _ => return Err(WError::ParseError("Unexpected offset type".to_string())),
         };
         ref_data_segment_offset
     };
@@ -94,22 +94,22 @@ pub fn verify_signature(
             };
             offset == ref_data_segment_offset
         }) {
-            None => Err(WError::ParseError(
+            None => return Err(WError::ParseError(
                 "Reference data segment not found".to_string(),
-            ))?,
+            )),
             Some(ref_data_segment) => ref_data_segment,
         };
         let ref_data_segment_value = ref_data_segment.value();
         if ref_data_segment_value.len() != 4 {
-            Err(WError::ParseError(
+            return Err(WError::ParseError(
                 "Encoded reference is too short".to_string(),
-            ))?
+            ))
         }
         let data_segment_offset = LittleEndian::read_i32(ref_data_segment_value);
         if data_segment_offset < 0 {
-            Err(WError::ParseError(
+            return Err(WError::ParseError(
                 "Negative data segment offset".to_string(),
-            ))?
+            ))
         }
         data_segment_offset
     };
@@ -141,7 +141,7 @@ pub fn verify_signature(
             };
             offset == data_segment_offset
         }) {
-            None => Err(WError::ParseError("Data segment not found".to_string()))?,
+            None => return Err(WError::ParseError("Data segment not found".to_string())),
             Some(data_segment) => data_segment,
         };
         let data_segment_value = data_segment.value_mut();
@@ -157,9 +157,9 @@ pub fn verify_signature(
     let module_bytes = parity_wasm::serialize(module)?;
     let signature_alg = signature.to_alg()?;
     if signature_alg.alg_id() != pk.alg_id() {
-        Err(WError::SignatureError(
+        return Err(WError::SignatureError(
             "Signature uses a different scheme than the provided public key",
-        ))?;
+        ));
     }
     signature_alg.verify(&module_bytes, ad, pk.raw(), &signature)
 }

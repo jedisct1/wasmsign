@@ -54,12 +54,12 @@ pub fn attach_signature(
     let (new_data_segment_offset, new_data_segment_len, new_data_memory_index, new_data_index) = {
         let data_section = module.data_section().expect("No data section");
         if (i32::MAX as u32 - last_data_segment.0 as u32) < last_data_segment.1 {
-            Err(WError::UsageError(
+            return Err(WError::UsageError(
                 "Data section is full, offset would overflow",
-            ))?;
+            ));
         }
         if data_section.entries().len() > u32::MAX as usize {
-            Err(WError::UsageError("Data section is full"))?;
+            return Err(WError::UsageError("Data section is full"));
         }
         let new_data_segment_offset = last_data_segment.0 + last_data_segment.1 as i32;
         let new_data_memory_index = 0;
@@ -68,7 +68,7 @@ pub fn attach_signature(
             Instruction::End,
         ];
         let empty_signature = vec![0; Signature::length(signature_alg)];
-        let new_data = empty_signature.clone();
+        let new_data = empty_signature;
         let new_data_segment_len = new_data.len() as u32;
         let new_data_segment = DataSegment::new(
             new_data_memory_index as u32,
@@ -91,12 +91,12 @@ pub fn attach_signature(
     let new_ref_data_segment_offset = {
         let data_section = module.data_section().expect("No data section");
         if (i32::MAX as u32 - new_data_segment_offset as u32) < new_data_segment_len {
-            Err(WError::UsageError(
+            return Err(WError::UsageError(
                 "Data section is full, offset would overflow",
-            ))?;
+            ));
         }
         if data_section.entries().len() > u32::MAX as usize {
-            Err(WError::UsageError("Data section is full"))?;
+            return Err(WError::UsageError("Data section is full"));
         }
         let new_ref_data_segment_offset = new_data_segment_offset + new_data_segment_len as i32;
         let new_ref_data_memory_index = new_data_memory_index;
@@ -123,7 +123,7 @@ pub fn attach_signature(
         let global_section = module.global_section().expect("No global section");
         let new_global_id = global_section.entries().len();
         if new_global_id > u32::MAX as usize {
-            Err(WError::UsageError("Global section ID would overflow"))?;
+            return Err(WError::UsageError("Global section ID would overflow"));
         }
         let new_global_id = new_global_id as u32;
         let new_global_type = GlobalType::new(ValueType::I32, false);
@@ -146,10 +146,10 @@ pub fn attach_signature(
             .iter()
             .any(|export_entry| export_entry.field() == signature_symbol)
         {
-            Err(WError::ParseError(format!(
+            return Err(WError::ParseError(format!(
                 "{} symbol already present",
                 signature_symbol
-            )))?;
+            )));
         }
         let new_export_entry =
             ExportEntry::new(signature_symbol.into(), Internal::Global(new_global_id));

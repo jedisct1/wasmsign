@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate failure;
-use parity_wasm;
+
 
 pub mod errors;
 pub mod signature;

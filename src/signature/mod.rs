@@ -32,7 +32,7 @@ impl Signature {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, WError> {
         let bytes_len = bytes.len();
         if bytes_len <= 4 {
-            Err(WError::ParseError("Short encoded signature".to_string()))?;
+            return Err(WError::ParseError("Short encoded signature".to_string()));
         }
         let alg_id = LittleEndian::read_u32(&bytes[..4]);
         let raw = bytes[4..].to_vec();
@@ -74,7 +74,7 @@ pub trait Key {
     fn anykey_from_bytes(bytes: &[u8]) -> Result<AnyKey, WError> {
         let bytes_len = bytes.len();
         if bytes_len <= 4 {
-            Err(WError::ParseError("Short encoded signature".to_string()))?;
+            return Err(WError::ParseError("Short encoded signature".to_string()));
         }
         let alg_id = LittleEndian::read_u32(&bytes[..4]);
         let raw = bytes[4..].to_vec();

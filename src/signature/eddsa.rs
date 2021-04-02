@@ -60,7 +60,7 @@ impl EdDSA {
         let mut ad_len = vec![];
         let ad = ad.unwrap_or_default();
         if ad.len() > u32::MAX as usize {
-            Err(WError::UsageError("Additional data too long"))?
+            return Err(WError::UsageError("Additional data too long"))
         }
         ad_len.write_u32::<LittleEndian>(ad.len() as u32)?;
 
