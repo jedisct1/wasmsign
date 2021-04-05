@@ -4,7 +4,7 @@ use hmac_sha512::Hash;
 use std::u32;
 
 const CONTEXT: &[u8] = b"WasmSignature";
-pub const ALG_ID: u32 = 0x0000_0001;
+pub const ALG_ID: u32 = 0x0000_0002;
 
 pub struct EdDSA;
 
