@@ -1,16 +1,18 @@
 use super::*;
 use std::fs::File;
 use std::io::prelude::*;
-use wasmsign;
+
 use wasmsign::signature::eddsa::*;
 
 pub fn keygen(config: &Config) -> Result<(), WError> {
     let default_signature_alg = EdDSA;
     let (pk_path, sk_path) = match (&config.pk_path, &config.sk_path) {
         (Some(pk_path), Some(sk_path)) => (pk_path, sk_path),
-        _ => Err(WError::UsageError(
-            "Please mention the file paths to store the public and secret keys",
-        ))?,
+        _ => {
+            return Err(WError::UsageError(
+                "Please mention the file paths to store the public and secret keys",
+            ))
+        }
     };
     let key_pair = wasmsign::keygen(&default_signature_alg);
     File::create(pk_path)?.write_all(&key_pair.pk.to_bytes())?;
@@ -23,9 +25,11 @@ pub fn keygen(config: &Config) -> Result<(), WError> {
 pub fn sign(config: &Config) -> Result<(), WError> {
     let (pk_path, sk_path) = match (&config.pk_path, &config.sk_path) {
         (Some(pk_path), Some(sk_path)) => (pk_path, sk_path),
-        _ => Err(WError::UsageError(
-            "Please mention the file paths to store the public and secret keys",
-        ))?,
+        _ => {
+            return Err(WError::UsageError(
+                "Please mention the file paths to store the public and secret keys",
+            ))
+        }
     };
     let mut pk_bytes = vec![];
     let mut sk_bytes = vec![];
@@ -35,20 +39,20 @@ pub fn sign(config: &Config) -> Result<(), WError> {
     let sk = SecretKey::from_bytes(&sk_bytes)?;
     let alg_id = pk.alg_id();
     if alg_id != sk.alg_id() {
-        Err(WError::UsageError(
+        return Err(WError::UsageError(
             "Public and secret keys are not of the same type",
-        ))?
+        ));
     }
     let key_pair = KeyPair::new(alg_id, pk, sk);
     let input_path = match &config.input_path {
         Some(input_path) => input_path,
-        _ => Err(WError::UsageError("Input file path required"))?,
+        _ => return Err(WError::UsageError("Input file path required")),
     };
     let output_path = match &config.output_path {
         Some(output_path) => output_path,
-        _ => Err(WError::UsageError("Output file path required"))?,
+        _ => return Err(WError::UsageError("Output file path required")),
     };
-    let ad: Option<&[u8]> = config.ad.as_ref().map(|s| s.as_slice());
+    let ad: Option<&[u8]> = config.ad.as_deref();
     let mut module_bytes = vec![];
     File::open(input_path)?.read_to_end(&mut module_bytes)?;
     let signed_module_bytes = match &config.custom_section_name {
@@ -62,18 +66,20 @@ pub fn sign(config: &Config) -> Result<(), WError> {
 pub fn verify(config: &Config) -> Result<(), WError> {
     let pk_path = match &config.pk_path {
         Some(pk_path) => pk_path,
-        _ => Err(WError::UsageError(
-            "Please mention the file paths containing the public key",
-        ))?,
+        _ => {
+            return Err(WError::UsageError(
+                "Please mention the file paths containing the public key",
+            ))
+        }
     };
     let mut pk_bytes = vec![];
     File::open(pk_path)?.read_to_end(&mut pk_bytes)?;
     let pk = PublicKey::from_bytes(&pk_bytes)?;
     let input_path = match &config.input_path {
         Some(input_path) => input_path,
-        _ => Err(WError::UsageError("Input file path required"))?,
+        _ => return Err(WError::UsageError("Input file path required")),
     };
-    let ad: Option<&[u8]> = config.ad.as_ref().map(|s| s.as_slice());
+    let ad: Option<&[u8]> = config.ad.as_deref();
     let mut module_bytes = vec![];
     File::open(input_path)?.read_to_end(&mut module_bytes)?;
     match &config.custom_section_name {

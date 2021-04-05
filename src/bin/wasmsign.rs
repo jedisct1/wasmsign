@@ -1,11 +1,9 @@
-use clap;
 
-use wasmsign;
 
 mod app;
 
-use self::app::*;
-use self::wasmsign::*;
+use app::*;
+use wasmsign::*;
 
 fn main() -> Result<(), WError> {
     let config = Config::parse_cmdline()?;
