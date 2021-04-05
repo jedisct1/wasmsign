@@ -118,7 +118,7 @@ pub fn verify_signature(
 
     // Work on a mutable copy of the module
 
-    let mut module = module.clone();
+    let mut module = module;
 
     // Compute the signature, and also return where it is stored
 
