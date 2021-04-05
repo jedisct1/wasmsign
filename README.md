@@ -20,23 +20,26 @@ The resulting binary remains a standalone, valid wasm binary, but its signature 
 
 # Usage
 
-```
+```text
     wasmsign [FLAGS] [OPTIONS] --symbol-name <symbol-name>
 
 FLAGS:
-    -h, --help       Prints help information
-    -G, --keygen     Generate a key pair
-    -S, --sign       Sign a file
-        --version    Prints version information
-    -V, --verify     Verify a file
+    -h, --help                  Prints help information
+    -G, --keygen                Generate a key pair
+    -S, --sign                  Sign a file
+    -C, --use-custom-section    Sign/verify signature in a Custom Section
+        --version               Prints version information
+    -V, --verify                Verify a file
 
 OPTIONS:
-    -a, --ad <ad>                      Additional content to authenticate
-    -i, --input <input-path>           Path to the wasm input file
-    -o, --output <output-path>         Path to the wasm output file
-    -p, --pk-path <pk-path>            Path to the public key file
-    -s, --sk-path <sk-path>            Path to the secret key file
-    -n, --symbol-name <symbol-name>    Name of the exported symbol containing the signature [default: ___SIGNATURE]
+    -a, --ad <ad>                                      Additional content to authenticate
+    -c, --custom-section-name <custom-section-name>    Name of the Custom Section containing the signature
+    -i, --input <input-path>                           Path to the wasm input file
+    -o, --output <output-path>                         Path to the wasm output file
+    -p, --pk-path <pk-path>                            Path to the public key file
+    -s, --sk-path <sk-path>                            Path to the secret key file
+    -n, --symbol-name <symbol-name>
+            Name of the exported symbol containing the signature [default: ___SIGNATURE]
 ```
 
 ## Create a key pair
