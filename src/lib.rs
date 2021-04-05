@@ -4,7 +4,6 @@ mod wasm_signature;
 
 pub use self::errors::*;
 pub use self::signature::*;
-use parity_wasm::elements::*;
 
 pub const DEFAULT_SYMBOL_NAME: &str = "___SIGNATURE";
 pub const DEFAULT_CUSTOM_SECTION_NAME: &str = "signature_wasmsign";
@@ -20,11 +19,7 @@ pub fn sign(
     symbol_name: &str,
 ) -> Result<Vec<u8>, WError> {
     let signature_alg = key_pair.sk.to_alg()?;
-    let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
-    let module =
-        wasm_signature::attach_signature(module, &signature_alg, ad, &key_pair, symbol_name)?;
-    let signed_module_bytes = parity_wasm::serialize(module)?;
-    Ok(signed_module_bytes)
+    wasm_signature::attach_signature(&module_bytes, &signature_alg, ad, &key_pair, symbol_name)
 }
 
 pub fn sign_custom_section(
@@ -34,16 +29,13 @@ pub fn sign_custom_section(
     custom_section_name: &str,
 ) -> Result<Vec<u8>, WError> {
     let signature_alg = key_pair.sk.to_alg()?;
-    let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
-    let module = wasm_signature::attach_signature_in_custom_section(
-        module,
+    wasm_signature::attach_signature_in_custom_section(
+        &module_bytes,
         &signature_alg,
         ad,
         &key_pair,
         custom_section_name,
-    )?;
-    let signed_module_bytes = parity_wasm::serialize(module)?;
-    Ok(signed_module_bytes)
+    )
 }
 
 pub fn verify(
@@ -53,8 +45,7 @@ pub fn verify(
     symbol_name: &str,
 ) -> Result<(), WError> {
     pk.to_alg()?;
-    let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
-    wasm_signature::verify_signature(&module, ad, pk, symbol_name)
+    wasm_signature::verify_signature(&module_bytes, ad, pk, symbol_name)
 }
 
 pub fn verify_custom_section(
@@ -64,6 +55,5 @@ pub fn verify_custom_section(
     custom_section_name: &str,
 ) -> Result<(), WError> {
     pk.to_alg()?;
-    let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
-    wasm_signature::verify_signature_in_custom_section(module, ad, pk, custom_section_name)
+    wasm_signature::verify_signature_in_custom_section(&module_bytes, ad, pk, custom_section_name)
 }

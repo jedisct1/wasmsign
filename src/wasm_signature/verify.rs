@@ -4,11 +4,13 @@ use byteorder::{ByteOrder, LittleEndian};
 use parity_wasm::elements::*;
 
 pub fn verify_signature(
-    module: &Module,
+    module_bytes: &[u8],
     ad: Option<&[u8]>,
     pk: &PublicKey,
     signature_symbol: &str,
 ) -> Result<(), WError> {
+    let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
+
     // Get the global ID of the exported name matching the signature symbol
     let global_id = {
         let export_section = module.export_section().expect("No export section");
@@ -165,32 +167,41 @@ pub fn verify_signature(
 }
 
 pub fn verify_signature_in_custom_section(
-    mut module: Module,
+    module_bytes: &[u8],
     ad: Option<&[u8]>,
     pk: &PublicKey,
     signature_section_name: &str,
 ) -> Result<(), WError> {
     // Find the Custom Section with a signature
 
-    let signature_section = match module.clear_custom_section(signature_section_name) {
-        None => {
-            return Err(WError::ParseError(format!(
-                "Custom Section {} not found",
-                signature_section_name
-            )))
-        }
-        Some(section) => section,
+    let signature_bytes = {
+        let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
+        let signature_bytes = match module
+            .custom_sections()
+            .find(|section| section.name() == signature_section_name)
+        {
+            None => {
+                return Err(WError::ParseError(format!(
+                    "Custom Section {} not found",
+                    signature_section_name
+                )))
+            }
+            Some(section) => section.payload(),
+        };
+        signature_bytes.to_vec()
     };
 
     // Check the signature
 
-    let signature = Signature::from_bytes(signature_section.payload())?;
+    let signature = Signature::from_bytes(&signature_bytes)?;
     let signature_alg = signature.to_alg()?;
     if signature_alg.alg_id() != pk.alg_id() {
         return Err(WError::SignatureError(
             "Signature uses a different scheme than the provided public key",
         ));
     }
-    let module_bytes = parity_wasm::serialize(module)?;
-    signature_alg.verify(&module_bytes, ad, pk.raw(), &signature)
+
+    let section_len = 2 + 1 + signature_section_name.len() + Signature::length(&signature_alg);
+    let signed_len = module_bytes.len() - section_len;
+    signature_alg.verify(&module_bytes[0..signed_len], ad, pk.raw(), &signature)
 }

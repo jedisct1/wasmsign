@@ -5,12 +5,14 @@ use parity_wasm::elements::*;
 use std::{i32, u32};
 
 pub fn attach_signature(
-    mut module: Module,
+    module_bytes: &[u8],
     signature_alg: &Box<dyn SignatureAlg>,
     ad: Option<&[u8]>,
     key_pair: &KeyPair,
     signature_symbol: &str,
-) -> Result<Module, WError> {
+) -> Result<Vec<u8>, WError> {
+    let mut module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
+
     // Find the offset after the last entry in the data section
 
     let last_data_segment = {
@@ -171,37 +173,57 @@ pub fn attach_signature(
         module
     };
 
-    Ok(module)
+    let signed_module_bytes = parity_wasm::serialize(module)?;
+    Ok(signed_module_bytes)
 }
 
 pub fn attach_signature_in_custom_section(
-    module: Module,
+    module_bytes: &[u8],
     signature_alg: &Box<dyn SignatureAlg>,
     ad: Option<&[u8]>,
     key_pair: &KeyPair,
     signature_section_name: &str,
-) -> Result<Module, WError> {
+) -> Result<Vec<u8>, WError> {
+    // Check if Custom Section with the requested name can be stored using a single-byte varint.
+
+    let section_len = 1 + signature_section_name.len() + Signature::length(signature_alg);
+    if section_len > 127 {
+        return Err(WError::UsageError(
+            "Custom Section name is too long (max. 58 characters)",
+        ));
+    }
+
     // Check if the Custom Section with a signature already exists
 
-    if module
-        .custom_sections()
-        .any(|section| section.name() == signature_section_name)
     {
-        return Err(WError::ParseError(format!(
-            "{} Custom Section already present",
-            signature_section_name
-        )));
+        let module: Module = parity_wasm::deserialize_buffer(module_bytes)?;
+        if module
+            .custom_sections()
+            .any(|section| section.name() == signature_section_name)
+        {
+            return Err(WError::ParseError(format!(
+                "{} Custom Section already present",
+                signature_section_name
+            )));
+        }
     }
 
     // Add Custom Section with the signature to the end of the module
 
-    let module = {
-        let module_code = parity_wasm::serialize(module)?;
-        let signature = signature_alg.sign(&module_code, ad, key_pair)?;
-        let mut module: Module = parity_wasm::deserialize_buffer(&module_code)?;
-        module.set_custom_section(signature_section_name, signature.to_bytes());
-        module
+    let signature = signature_alg.sign(&module_bytes, ad, key_pair)?;
+
+    let signed_module_bytes = {
+        let mut custom_section = Vec::<u8>::with_capacity(section_len + 2);
+        custom_section.extend_from_slice(&[0]);
+        custom_section.extend_from_slice(&[section_len as u8]);
+        custom_section.extend_from_slice(&[signature_section_name.len() as u8]);
+        custom_section.extend_from_slice(signature_section_name.as_bytes());
+        custom_section.extend_from_slice(&signature.to_bytes());
+
+        let mut signed_module_bytes = module_bytes.to_vec();
+        signed_module_bytes.extend_from_slice(&custom_section);
+        signed_module_bytes
     };
 
-    Ok(module)
+    Ok(signed_module_bytes)
 }
