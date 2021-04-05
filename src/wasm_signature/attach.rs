@@ -173,3 +173,35 @@ pub fn attach_signature(
 
     Ok(module)
 }
+
+pub fn attach_signature_in_custom_section(
+    module: Module,
+    signature_alg: &Box<dyn SignatureAlg>,
+    ad: Option<&[u8]>,
+    key_pair: &KeyPair,
+    signature_section_name: &str,
+) -> Result<Module, WError> {
+    // Check if the Custom Section with a signature already exists
+
+    if module
+        .custom_sections()
+        .any(|section| section.name() == signature_section_name)
+    {
+        return Err(WError::ParseError(format!(
+            "{} Custom Section already present",
+            signature_section_name
+        )));
+    }
+
+    // Add Custom Section with the signature to the end of the module
+
+    let module = {
+        let module_code = parity_wasm::serialize(module)?;
+        let signature = signature_alg.sign(&module_code, ad, key_pair)?;
+        let mut module: Module = parity_wasm::deserialize_buffer(&module_code)?;
+        module.set_custom_section(signature_section_name, signature.to_bytes());
+        module
+    };
+
+    Ok(module)
+}

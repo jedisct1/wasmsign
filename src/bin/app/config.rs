@@ -13,6 +13,7 @@ pub struct Config {
     pub sk_path: Option<PathBuf>,
     pub ad: Option<Vec<u8>>,
     pub symbol_name: String,
+    pub custom_section_name: Option<String>,
 }
 
 impl Config {
@@ -90,6 +91,22 @@ impl Config {
                     .default_value(DEFAULT_SYMBOL_NAME)
                     .help("Name of the exported symbol containing the signature"),
             )
+            .arg(
+                Arg::with_name("use-custom-section")
+                    .short("C")
+                    .long("use-custom-section")
+                    .takes_value(false)
+                    .help("Sign/verify signature in a Custom Section"),
+            )
+            .arg(
+                Arg::with_name("custom-section-name")
+                    .short("c")
+                    .long("custom-section-name")
+                    .takes_value(true)
+                    .required(false)
+                    .default_value_if("use-custom-section", None, DEFAULT_CUSTOM_SECTION_NAME)
+                    .help("Name of the Custom Section containing the signature"),
+            )
             .get_matches();
         let keygen = matches.is_present("keygen");
         let sign = matches.is_present("sign");
@@ -100,6 +117,7 @@ impl Config {
         let sk_path = matches.value_of("sk-path").map(PathBuf::from);
         let ad = matches.value_of("ad").map(|s| s.as_bytes().to_vec());
         let symbol_name = matches.value_of("symbol-name").unwrap().to_string();
+        let custom_section_name = matches.value_of("custom-section-name").map(String::from);
         Ok(Config {
             keygen,
             sign,
@@ -110,6 +128,7 @@ impl Config {
             sk_path,
             ad,
             symbol_name,
+            custom_section_name,
         })
     }
 }
