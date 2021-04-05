@@ -1,4 +1,5 @@
-
+#[macro_use]
+extern crate clap;
 
 mod app;
 

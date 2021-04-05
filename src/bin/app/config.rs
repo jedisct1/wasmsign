@@ -1,5 +1,5 @@
 use super::*;
-use clap::{App, Arg};
+use clap::Arg;
 use std::path::PathBuf;
 
 #[derive(Default, Clone, Debug)]
@@ -18,9 +18,7 @@ pub struct Config {
 
 impl Config {
     pub fn parse_cmdline() -> Result<Self, WError> {
-        let matches = App::new("wasmsign")
-            .version("1.0")
-            .about("Sign WASM binaries")
+        let matches = app_from_crate!()
             .arg(
                 Arg::with_name("keygen")
                     .short("G")
