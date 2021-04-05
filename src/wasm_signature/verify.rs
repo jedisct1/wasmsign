@@ -163,3 +163,34 @@ pub fn verify_signature(
     }
     signature_alg.verify(&module_bytes, ad, pk.raw(), &signature)
 }
+
+pub fn verify_signature_in_custom_section(
+    mut module: Module,
+    ad: Option<&[u8]>,
+    pk: &PublicKey,
+    signature_section_name: &str,
+) -> Result<(), WError> {
+    // Find the Custom Section with a signature
+
+    let signature_section = match module.clear_custom_section(signature_section_name) {
+        None => {
+            return Err(WError::ParseError(format!(
+                "Custom Section {} not found",
+                signature_section_name
+            )))
+        }
+        Some(section) => section,
+    };
+
+    // Check the signature
+
+    let signature = Signature::from_bytes(signature_section.payload())?;
+    let signature_alg = signature.to_alg()?;
+    if signature_alg.alg_id() != pk.alg_id() {
+        return Err(WError::SignatureError(
+            "Signature uses a different scheme than the provided public key",
+        ));
+    }
+    let module_bytes = parity_wasm::serialize(module)?;
+    signature_alg.verify(&module_bytes, ad, pk.raw(), &signature)
+}
