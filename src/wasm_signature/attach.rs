@@ -184,7 +184,7 @@ pub fn attach_signature_in_custom_section(
     key_pair: &KeyPair,
     signature_section_name: &str,
 ) -> Result<Vec<u8>, WError> {
-    // Check if Custom Section with the requested name can be stored using a single-byte variant.
+    // Check if Custom Section with the requested name can be stored using a single-byte varint.
 
     let section_len = 1 + signature_section_name.len() + Signature::length(signature_alg);
     if section_len > 127 {
