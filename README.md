@@ -8,7 +8,7 @@ A tool to add and verify digital signatures to/from WASM binaries.
 
 Unlike typical desktop and mobile applications, WebAssembly binaries do not embed any kind of digital signatures to verify that they come from a trusted source, and haven't been tampered with.
 
-Wasmsign takes an existing wasm binary, computes an EdDSA signature, and builds a new binary embedding that signature as a global, exported symbol.
+Wasmsign takes an existing wasm binary, computes an EdDSA signature, and builds a new module embedding that signature.
 
 The resulting binary remains a standalone, valid wasm binary, but its signature can be verified prior to executing it.
 
