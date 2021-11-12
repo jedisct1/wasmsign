@@ -19,7 +19,7 @@ pub fn sign(
     symbol_name: &str,
 ) -> Result<Vec<u8>, WError> {
     let signature_alg = key_pair.sk.to_alg()?;
-    wasm_signature::attach_signature(&module_bytes, &signature_alg, ad, &key_pair, symbol_name)
+    wasm_signature::attach_signature(module_bytes, &signature_alg, ad, key_pair, symbol_name)
 }
 
 pub fn sign_custom_section(
@@ -30,10 +30,10 @@ pub fn sign_custom_section(
 ) -> Result<Vec<u8>, WError> {
     let signature_alg = key_pair.sk.to_alg()?;
     wasm_signature::attach_signature_in_custom_section(
-        &module_bytes,
+        module_bytes,
         &signature_alg,
         ad,
-        &key_pair,
+        key_pair,
         custom_section_name,
     )
 }
@@ -45,7 +45,7 @@ pub fn verify(
     symbol_name: &str,
 ) -> Result<(), WError> {
     pk.to_alg()?;
-    wasm_signature::verify_signature(&module_bytes, ad, pk, symbol_name)
+    wasm_signature::verify_signature(module_bytes, ad, pk, symbol_name)
 }
 
 pub fn verify_custom_section(
@@ -55,5 +55,5 @@ pub fn verify_custom_section(
     custom_section_name: &str,
 ) -> Result<(), WError> {
     pk.to_alg()?;
-    wasm_signature::verify_signature_in_custom_section(&module_bytes, ad, pk, custom_section_name)
+    wasm_signature::verify_signature_in_custom_section(module_bytes, ad, pk, custom_section_name)
 }

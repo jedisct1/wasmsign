@@ -210,7 +210,7 @@ pub fn attach_signature_in_custom_section(
 
     // Add Custom Section with the signature to the end of the module
 
-    let signature = signature_alg.sign(&module_bytes, ad, key_pair)?;
+    let signature = signature_alg.sign(module_bytes, ad, key_pair)?;
 
     let signed_module_bytes = {
         let mut custom_section = Vec::<u8>::with_capacity(section_len + 2);

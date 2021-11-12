@@ -57,7 +57,7 @@ pub fn sign(config: &Config) -> Result<(), WError> {
     File::open(input_path)?.read_to_end(&mut module_bytes)?;
     let signed_module_bytes = match &config.custom_section_name {
         None => wasmsign::sign(&module_bytes, &key_pair, ad, &config.symbol_name)?,
-        Some(n) => wasmsign::sign_custom_section(&module_bytes, &key_pair, ad, &n)?,
+        Some(n) => wasmsign::sign_custom_section(&module_bytes, &key_pair, ad, n)?,
     };
     File::create(output_path)?.write_all(&signed_module_bytes)?;
     Ok(())
@@ -84,6 +84,6 @@ pub fn verify(config: &Config) -> Result<(), WError> {
     File::open(input_path)?.read_to_end(&mut module_bytes)?;
     match &config.custom_section_name {
         None => wasmsign::verify(&module_bytes, &pk, ad, &config.symbol_name),
-        Some(n) => wasmsign::verify_custom_section(&module_bytes, &pk, ad, &n),
+        Some(n) => wasmsign::verify_custom_section(&module_bytes, &pk, ad, n),
     }
 }

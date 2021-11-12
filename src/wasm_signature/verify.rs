@@ -66,11 +66,11 @@ pub fn verify_signature(
                 "End not found in the global entry code".to_string(),
             ));
         }
-        let ref_data_segment_offset = match global_entry_code[0] {
+        
+        match global_entry_code[0] {
             Instruction::I32Const(ref_data_segment_offset) => ref_data_segment_offset,
             _ => return Err(WError::ParseError("Unexpected offset type".to_string())),
-        };
-        ref_data_segment_offset
+        }
     };
 
     // Get the address of the signature
