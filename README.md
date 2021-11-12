@@ -12,6 +12,10 @@ Wasmsign takes an existing wasm binary, computes an EdDSA signature, and builds 
 
 The resulting binary remains a standalone, valid wasm binary, but its signature can be verified prior to executing it.
 
+# Warning
+
+This tool is being superseded by [Wasmsign2](https://github.com/wasm-signatures/wasmsign2).
+
 # Installation
 
 `wasmsign` requires rust, which can be installed using [`rustup`](https://rustup.rs/).
