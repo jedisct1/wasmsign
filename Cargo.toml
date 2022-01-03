@@ -11,7 +11,7 @@ documentation = "https://github.com/jedisct1/wasmsign/blob/master/README.md"
 
 [dependencies]
 byteorder = "1"
-clap = "2"
+clap = "3"
 ed25519-compact = "1.0.0"
 anyhow = "1"
 thiserror = "1"
